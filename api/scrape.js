@@ -7,6 +7,15 @@ const cheerio = require("cheerio");
 const SCRAPINGBEE_API_KEY = process.env.SCRAPINGBEE_API_KEY;
 
 module.exports = async function handler(req, res) {
+  // 🔵 CORS — necesario para permitir llamadas desde tu frontend
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     const { url } = req.query;
 
