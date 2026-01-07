@@ -2,7 +2,7 @@ export const config = {
   runtime: "nodejs",
 };
 
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 
 const SCRAPINGBEE_API_KEY = process.env.SCRAPINGBEE_API_KEY;
 
