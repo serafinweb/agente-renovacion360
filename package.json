@@ -1,0 +1,8 @@
+{
+  "name": "agente-renovacion360",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}
