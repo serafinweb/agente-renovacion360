@@ -2,11 +2,11 @@ export const config = {
   runtime: "nodejs",
 };
 
-import * as cheerio from "cheerio";
+const cheerio = require("cheerio");
 
 const SCRAPINGBEE_API_KEY = process.env.SCRAPINGBEE_API_KEY;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     const { url } = req.query;
 
@@ -20,7 +20,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // 1) Llamada a ScrapingBee con User-Agent real
     const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1?api_key=${SCRAPINGBEE_API_KEY}&url=${encodeURIComponent(
       url
     )}&render_js=true`;
@@ -42,11 +41,8 @@ export default async function handler(req, res) {
     }
 
     const html = await response.text();
-
-    // 2) Cargar HTML en Cheerio
     const $ = cheerio.load(html);
 
-    // 3) Título y meta descripción
     const title =
       $("title").first().text().trim() ||
       $('meta[property="og:title"]').attr("content") ||
@@ -57,7 +53,6 @@ export default async function handler(req, res) {
       $('meta[property="og:description"]').attr("content") ||
       "";
 
-    // 4) H1, H2, H3
     const h1 = $("h1")
       .map((_, el) => $(el).text().trim())
       .get()
@@ -73,10 +68,10 @@ export default async function handler(req, res) {
       .get()
       .filter(Boolean);
 
-    // 5) Teléfonos
     const bodyText = $("body").text().replace(/\s+/g, " ");
     const phoneRegex =
       /(\+34)?\s?(\d{3}[\s-]?\d{2,3}[\s-]?\d{2,3}|\d{9})/g;
+
     const phones = Array.from(
       new Set(
         (bodyText.match(phoneRegex) || [])
@@ -85,14 +80,13 @@ export default async function handler(req, res) {
       )
     );
 
-    // 6) Emails
     const emailRegex =
       /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
     const emails = Array.from(
       new Set((bodyText.match(emailRegex) || []).map((e) => e.trim()))
     );
 
-    // 7) Redes sociales
     const socialSelectors = [
       'a[href*="facebook.com"]',
       'a[href*="instagram.com"]',
@@ -124,7 +118,6 @@ export default async function handler(req, res) {
       });
     });
 
-    // 8) Servicios
     const serviceKeywords = [
       "servicio",
       "servicios",
@@ -159,7 +152,6 @@ export default async function handler(req, res) {
 
     services = Array.from(new Set(services)).slice(0, 15);
 
-    // 9) Dirección
     const addressCandidates = [];
     $('*[class*="direccion"], *[class*="address"], address').each(
       (_, el) => {
@@ -170,7 +162,6 @@ export default async function handler(req, res) {
 
     const address = addressCandidates[0] || "";
 
-    // 10) Logo
     let logo =
       $('img[alt*="logo" i]').attr("src") ||
       $('img[src*="logo"]').attr("src") ||
@@ -184,10 +175,8 @@ export default async function handler(req, res) {
       logo = `${normalizedUrl.origin}${logo}`;
     }
 
-    // 11) Texto principal
     const mainText = $("body").text().replace(/\s+/g, " ").trim();
 
-    // 12) Sector detectado
     const sectorKeywords = [
       { key: "cristal", sector: "Cristalería" },
       { key: "ventana", sector: "Cristalería" },
@@ -214,7 +203,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // 13) Respuesta final
     res.status(200).json({
       sourceUrl: url,
       title,
@@ -238,4 +226,4 @@ export default async function handler(req, res) {
       details: error.message,
     });
   }
-}
+};
