@@ -2,7 +2,6 @@ export const config = {
   runtime: "nodejs",
 };
 
-import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 
 const SCRAPINGBEE_API_KEY = process.env.SCRAPINGBEE_API_KEY;
@@ -16,9 +15,9 @@ export default async function handler(req, res) {
     }
 
     if (!SCRAPINGBEE_API_KEY) {
-      return res
-        .status(500)
-        .json({ error: "Falta SCRAPINGBEE_API_KEY en las variables de entorno" });
+      return res.status(500).json({
+        error: "Falta SCRAPINGBEE_API_KEY en las variables de entorno",
+      });
     }
 
     // 1) Llamada a ScrapingBee con User-Agent real
