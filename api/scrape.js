@@ -1,5 +1,3 @@
-// /api/scrape.js
-
 export const config = {
   runtime: "nodejs",
 };
