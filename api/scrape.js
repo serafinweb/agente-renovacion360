@@ -1,5 +1,9 @@
 // /api/scrape.js
 
+export const config = {
+  runtime: "nodejs",
+};
+
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 
@@ -19,12 +23,17 @@ export default async function handler(req, res) {
         .json({ error: "Falta SCRAPINGBEE_API_KEY en las variables de entorno" });
     }
 
-    // 1) Llamada a ScrapingBee
+    // 1) Llamada a ScrapingBee con User-Agent real
     const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1?api_key=${SCRAPINGBEE_API_KEY}&url=${encodeURIComponent(
       url
     )}&render_js=true`;
 
-    const response = await fetch(scrapingBeeUrl);
+    const response = await fetch(scrapingBeeUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    });
 
     if (!response.ok) {
       const text = await response.text();
@@ -106,24 +115,19 @@ export default async function handler(req, res) {
         const href = $(el).attr("href");
         if (!href) return;
 
-        if (href.includes("facebook.com"))
-          socialLinks.facebook = href;
-        if (href.includes("instagram.com"))
-          socialLinks.instagram = href;
+        if (href.includes("facebook.com")) socialLinks.facebook = href;
+        if (href.includes("instagram.com")) socialLinks.instagram = href;
         if (href.includes("twitter.com") || href.includes("x.com"))
           socialLinks.twitter = href;
-        if (href.includes("tiktok.com"))
-          socialLinks.tiktok = href;
-        if (href.includes("linkedin.com"))
-          socialLinks.linkedin = href;
-        if (href.includes("youtube.com"))
-          socialLinks.youtube = href;
+        if (href.includes("tiktok.com")) socialLinks.tiktok = href;
+        if (href.includes("linkedin.com")) socialLinks.linkedin = href;
+        if (href.includes("youtube.com")) socialLinks.youtube = href;
         if (href.includes("wa.me") || href.includes("api.whatsapp.com"))
           socialLinks.whatsapp = href;
       });
     });
 
-    // 8) Servicios (heurística)
+    // 8) Servicios
     const serviceKeywords = [
       "servicio",
       "servicios",
